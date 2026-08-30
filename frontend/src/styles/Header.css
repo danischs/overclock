@@ -1,0 +1,92 @@
+/* ===== Root Theme Colors ===== */
+:root {
+  --stone: #1f1f1f;
+  --iron: #2c2c2c;
+  --bone: #e8e4dc;
+  --gold: #c5a24f;
+  --gold-soft: rgba(197, 162, 79, 0.4);
+}
+
+/* ===== Header Container ===== */
+header {
+  background-color: var(--stone);
+  color: var(--bone);
+  border-bottom: 4px solid var(--gold);
+  padding: 0 0.75rem; 
+}
+
+img{
+    width: 180px;
+}
+
+/* ===== Layout Wrapper ===== */
+#navigator-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 80px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ===== Logo ===== */
+h1 {
+  font-size: 1.8rem;
+  letter-spacing: 2px;
+  font-weight: 600;
+  color: var(--gold);
+  margin: 0;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+  text-align: left;
+}
+
+h1:hover {
+  opacity: 0.8;
+}
+
+/* ===== Navigation ===== */
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== Nav Items ===== */
+nav li {
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+/* Links */
+nav a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ===== Hover Effect (Runic Gold Underline) ===== */
+nav li::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0%;
+  height: 2px;
+  background-color: var(--gold);
+  transition: width 0.3s ease;
+}
+
+nav li:hover {
+  color: var(--gold);
+}
+
+nav li:hover::after {
+  width: 100%;
+}

@@ -1,0 +1,67 @@
+:root {
+  --stone: #1f1f1f;
+  --iron: #2c2c2c;
+  --iron-2: #242424;
+  --bone: #e8e4dc;
+  --gold: #c5a24f;
+  --gold-soft: rgba(197, 162, 79, 0.45);
+}
+
+
+.timer-shell {                 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1.5rem;   
+    min-height: 0;           
+}
+
+
+.timer-card {
+    margin-top: 5rem;
+    width: min(680px, 100%);
+    background: linear-gradient(180deg, var(--iron), var(--iron-2));
+    border: 1px solid rgba(232, 228, 220, 0.08);
+    border-top: 3px solid var(--gold);
+    border-radius: 10px;
+    padding: 3.25rem 2.5rem 2.25rem;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    text-align: center;
+    position: relative;
+}
+
+
+.timer-card::before {
+  content: "᛫ ᚨ ᛫ ᚱ ᛫";
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(197, 162, 79, 0.55);
+  letter-spacing: 16px;
+  font-size: 1.8rem;
+  text-shadow: 0 0 8px rgba(197, 162, 79, 0.4);
+}
+
+
+#timer {
+  width: 200px;
+  margin: 20px auto;
+  font-size: clamp(3rem, 6vw, 5rem);
+  color: var(--gold);
+  text-shadow: 0 0 14px rgba(197, 162, 79, 0.35);
+}
+
+
+.timer-actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+body {
+  background: #111;
+  color: var(--bone);
+}
