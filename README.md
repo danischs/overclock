@@ -58,8 +58,8 @@ productivity-app/
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/danischs/productivity-app.git
-cd productivity-app
+git clone https://github.com/danischs/overclock.git
+cd overclock
 ```
 
 ### 2. Set up the database
