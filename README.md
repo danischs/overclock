@@ -1,4 +1,4 @@
-# LevelUp — Productivity App
+# Overclock — Productivity App
 
 A full-stack productivity app with user accounts and a Pomodoro-style focus timer, built with React (Vite) on the frontend and Express + PostgreSQL on the backend.
 

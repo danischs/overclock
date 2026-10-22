@@ -1,6 +1,6 @@
 import Footer from "../components/Footer";
 import "../styles/Login.css";
-import LevelUpLogo from "../assets/LevelUpLogo.png"
+import OverclockLogo from "../assets/OverclockLogo.png"
 import Button from "../components/Button"
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
@@ -49,8 +49,8 @@ export function Login({ setUserId }) {
 
           <div className="login-container">
             <img
-            src={LevelUpLogo}
-            alt="Level Up Logo"
+            src={OverclockLogo}
+            alt="Overclock Logo"
             className="login-logo"
             />
             <form>

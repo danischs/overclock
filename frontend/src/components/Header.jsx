@@ -1,12 +1,12 @@
 
 import '../styles/Header.css';
-import logo from '../assets/LevelUpLogo.png'
+import logo from '../assets/OverclockLogo.png'
 
 function Header(){
     return(
         <header>
             <div id = "navigator-container">
-            <img src = {logo} alt = "Level Up logo"/>
+            <img src = {logo} alt = "Overclock logo"/>
                 <nav>
                     <ul>
                         <li><a href="#">Home</a></li>
