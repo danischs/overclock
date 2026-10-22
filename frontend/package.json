@@ -1,5 +1,5 @@
 {
-  "name": "productivity-app",
+  "name": "overclock",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -30,13 +30,13 @@
   "main": "vite.config.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/danischs/productivity-app.git"
+    "url": "git+https://github.com/danischs/overclock.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/danischs/productivity-app/issues"
+    "url": "https://github.com/danischs/overclock/issues"
   },
-  "homepage": "https://github.com/danischs/productivity-app#readme"
+  "homepage": "https://github.com/danischs/overclock#readme"
 }
