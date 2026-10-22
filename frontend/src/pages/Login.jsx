@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-export function Login() {
+export function Login({ setUserId }) {
   let [username, setUsername] = useState("");
   let [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -33,6 +33,7 @@ export function Login() {
     const data = await response.json()
 
     if (data.accessAllowed == true){
+      setUserId(data.userId);
       navigate("/home");
     }
   }

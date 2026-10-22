@@ -3,14 +3,14 @@ import PomodoroTimer from "../features/PomodoroTimer"
 import Footer from "../components/Footer"
 import '../styles/Home.css';
 
-export function Home(){
+export function Home({ userId }){
   return(
     <>
       <div className="main-content">
         <Header />
-        <PomodoroTimer />
+        <PomodoroTimer userId={userId} />
       </div>
-      <Footer />   
+      <Footer />
     </>
   )
 

@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import userRoutes from "./routes/users.js";
+import sessionRoutes from "./routes/sessions.js";
 
 dotenv.config();
 
@@ -16,5 +17,6 @@ app.use(express.json())
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 
 app.use("/users", userRoutes);
+app.use("/sessions", sessionRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

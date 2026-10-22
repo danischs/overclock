@@ -30,7 +30,8 @@ router.post("/login", async (req,res) =>{
     }
     const passwordCheck = await bcrypt.compare(password, result.rows[0].password_hash);
 
-    return res.json({"accessAllowed" : passwordCheck})
+    if (!passwordCheck) return res.json({ accessAllowed: false });
+    return res.json({ accessAllowed: true, userId: result.rows[0].id });
 
 });
 
