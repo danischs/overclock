@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: productivity_app
+      POSTGRES_DB: overclock
     ports:
       - "5432:5432"
     volumes:
@@ -28,7 +28,7 @@ services:
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
-      DB_NAME: productivity_app
+      DB_NAME: overclock
       PORT: 3000
       CLIENT_ORIGIN: http://localhost:5173
     ports:

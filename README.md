@@ -27,7 +27,7 @@ A full-stack productivity app with user accounts and a Pomodoro-style focus time
 ## Project Structure
 
 ```
-productivity-app/
+overclock/
 ├── frontend/
 │   ├── src/
 │   │   ├── app/          # App entry & routing
