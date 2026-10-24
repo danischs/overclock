@@ -1,22 +1,64 @@
-button {
-  border-radius: 12px;
-  padding: 0.9rem 1.2rem;
-  font-size: 0.95rem;
-  letter-spacing: 1px;
+/* Chamfered button: outer layer is the border, ::before is the fill */
+.btn {
+  --ch: 9px;
+  --b: var(--line-strong);
+  --f: var(--void);
+  position: relative;
+  isolation: isolate;
+  min-width: 8.5rem;
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink);
+  border: none;
+  background: var(--b);
+  clip-path: polygon(var(--ch) 0, 100% 0, 100% calc(100% - var(--ch)), calc(100% - var(--ch)) 100%, 0 100%, 0 var(--ch));
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-  background: var(--gold);
-  color: #141414;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  box-shadow: 0 10px 20px rgba(197, 162, 79, 0.22);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 28px rgba(197, 162, 79, 0.28);
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--f);
+  clip-path: inherit;
+  transition: background-color 0.15s ease;
 }
 
-button:active {
-  transform: translateY(0px);
+.btn:hover { --b: var(--ink); }
+
+.btn--primary {
+  --b: var(--signal);
+  --f: var(--signal);
+  color: #0a0006;
+}
+
+.btn--primary:hover {
+  --b: #ff5aa9;
+  --f: #ff5aa9;
+}
+
+.btn--active {
+  --b: var(--signal);
+  --f: #1c0612;
+  color: var(--signal);
+  text-shadow: var(--glow-signal);
+}
+
+.btn--active:hover { --f: #2b0a1c; --b: var(--signal); }
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn:focus-visible {
+  outline: none;
+  --b: var(--cyan);
 }

@@ -1,0 +1,203 @@
+/* =========================================================
+   Overclock theme — tactical HUD
+   Every color, font, border and glow lives here.
+   Component CSS should only reference these variables.
+   ========================================================= */
+
+:root {
+  /* Color */
+  --void: #060708;          /* page background */
+  --panel: #0c0e11;         /* raised surfaces */
+  --line: #22262d;          /* hairlines */
+  --line-strong: #3a3f48;   /* hover / emphasized hairlines */
+  --steel: #7c838e;         /* secondary text */
+  --ink: #ece9e2;           /* primary text */
+  --signal: #ff1f8f;        /* the one accent: active + progress only */
+  --signal-dim: rgba(255, 31, 143, 0.16);
+  --danger: #ff6b5e;        /* form errors */
+  --cyan: #00e5ff;          /* only used for chromatic split + data glints */
+
+  /* Type */
+  --font-ui: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --text-xs: 0.72rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --tracking-label: 0.14em;
+
+  /* Shape */
+  --border: 1px solid var(--line);
+  --radius: 2px;
+  --bracket: 12px;          /* corner bracket arm length */
+  --chamfer: 14px;          /* cut-corner size */
+
+  /* Effects */
+  --glow-signal: 0 0 12px rgba(255, 31, 143, 0.45);
+  --split: -2px 0 rgba(255, 31, 143, 0.75), 2px 0 rgba(0, 229, 255, 0.6);
+
+  /* Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  --page-max: 1120px;
+  color-scheme: dark;
+}
+
+/* ===== Reset & base ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 31, 143, 0.09), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 110%, rgba(0, 229, 255, 0.05), transparent 60%),
+    var(--void);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 1px solid var(--signal);
+  outline-offset: 3px;
+}
+
+/* CRT scanlines + grain over everything (static, no animation) */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, 0.22) 2px 3px),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.07'/></svg>");
+}
+
+/* ===== Shared HUD pieces ===== */
+
+/* Chromatic split for display text */
+.chromatic {
+  text-shadow: var(--split);
+}
+
+/* Japanese micro-text */
+.kana {
+  font-family: "Noto Sans JP", var(--font-ui);
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  color: var(--steel);
+}
+
+/* Barcode strip */
+.barcode {
+  height: 22px;
+  width: 112px;
+  background: repeating-linear-gradient(90deg,
+    var(--ink) 0 1px, transparent 1px 3px,
+    var(--ink) 3px 5px, transparent 5px 6px,
+    var(--ink) 6px 7px, transparent 7px 10px,
+    var(--ink) 10px 13px, transparent 13px 14px);
+  opacity: 0.7;
+}
+
+/* Warning tape */
+.tape {
+  height: 6px;
+  background: repeating-linear-gradient(-45deg, var(--signal) 0 6px, transparent 6px 12px);
+}
+
+/* Chamfered panel: cut top-left + bottom-right corners, 1px border */
+.chamfer {
+  --ch: var(--chamfer);
+  --chamfer-border: var(--line-strong);
+  --chamfer-fill: var(--panel);
+  position: relative;
+  isolation: isolate;
+  background: var(--chamfer-border);
+  clip-path: polygon(var(--ch) 0, 100% 0, 100% calc(100% - var(--ch)), calc(100% - var(--ch)) 100%, 0 100%, 0 var(--ch));
+}
+
+.chamfer::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--chamfer-fill);
+  clip-path: polygon(var(--ch) 0, 100% 0, 100% calc(100% - var(--ch)), calc(100% - var(--ch)) 100%, 0 100%, 0 var(--ch));
+}
+
+/* Micro-label: small uppercase readout text */
+.hud-label {
+  font-family: var(--font-data);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+/* Bracket frame: hairline box with brighter corner brackets */
+.frame {
+  position: relative;
+  border: var(--border);
+  background: var(--panel);
+}
+
+.frame::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  --c: var(--ink);
+  --b: var(--bracket);
+  background:
+    linear-gradient(var(--c), var(--c)) top left / var(--b) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) top left / 1px var(--b) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--b) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / 1px var(--b) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / var(--b) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / 1px var(--b) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--b) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / 1px var(--b) no-repeat;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

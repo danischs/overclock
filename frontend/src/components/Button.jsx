@@ -1,10 +1,23 @@
-import "../styles/Button.css"
+import "../styles/Button.css";
 
-
-export default function Button(props) {
-    return (
-        <button onClick={props.onClick}>
-            {props.label}
-        </button>
-    );
+/**
+ * variant: "primary" (filled ink) | "ghost" (outline) | "active" (signal outline)
+ */
+export default function Button({
+  label,
+  onClick,
+  type = "button",
+  variant = "ghost",
+  disabled = false,
+}) {
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`btn btn--${variant}`}
+    >
+      {label}
+    </button>
+  );
 }
