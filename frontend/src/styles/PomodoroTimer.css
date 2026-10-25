@@ -123,6 +123,71 @@
   gap: var(--space-3);
 }
 
+/* ===== Preset selector ===== */
+.preset-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.preset-btns {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.preset-btn {
+  flex: 1;
+  padding: var(--space-2) var(--space-2);
+  font-family: var(--font-data);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  background: transparent;
+  border: var(--border);
+  color: var(--steel);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.preset-btn:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.preset-btn--active {
+  color: var(--signal);
+  border-color: var(--signal);
+}
+
+.preset-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Break phase — swap accent from signal (pink) to cyan */
+.timer--break.timer--running .ring-progress {
+  stroke: var(--cyan);
+  filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.7));
+}
+
+.timer--break.timer--running .tick--lit { stroke: var(--cyan); }
+.timer--break.timer--paused .tick--lit  { stroke: var(--ink); }
+
+.timer--break.timer--running .timer__digits {
+  text-shadow: 0 0 18px rgba(0, 229, 255, 0.35);
+}
+
+.timer--break.timer--running .timer__state { color: var(--cyan); }
+
+.timer--break.timer--running .hud-panel__vertical {
+  color: var(--cyan);
+  text-shadow: 0 0 12px rgba(0, 229, 255, 0.45);
+}
+
+.timer--break .preset-btn--active {
+  color: var(--cyan);
+  border-color: var(--cyan);
+}
+
 .timer__saved {
   min-height: 1.2em;
   margin-top: calc(var(--space-6) * -1);

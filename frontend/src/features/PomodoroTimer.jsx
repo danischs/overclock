@@ -5,7 +5,12 @@ import "../styles/PomodoroTimer.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-const SESSION_SECONDS = 60 * 60;
+const PRESETS = [
+  { label: "25 / 5",  work: 25 * 60, brk:  5 * 60 },
+  { label: "50 / 10", work: 50 * 60, brk: 10 * 60 },
+  { label: "60",      work: 60 * 60, brk:  0       },
+];
+
 const TICKS = 60;
 const SEGMENTS = 24;
 const SIZE = 360;
@@ -13,25 +18,26 @@ const C = SIZE / 2;
 const ARC_R = 116;
 const ARC_LEN = 2 * Math.PI * ARC_R;
 
-const STATE = {
-  ready:   { label: "Standby",          pill: "Idle" },
-  running: { label: "Focusing",         pill: "Active" },
-  paused:  { label: "Paused",           pill: "Hold" },
-  done:    { label: "Session complete", pill: "Done" },
-};
-
 const polar = (r, deg) => {
   const a = ((deg - 90) * Math.PI) / 180;
   return [C + Math.cos(a) * r, C + Math.sin(a) * r];
 };
 
 function PomodoroTimer({ userId }) {
-  const [seconds, setSeconds] = useState(SESSION_SECONDS);
+  const [presetIdx, setPresetIdx] = useState(2);
+  const [phase, setPhase] = useState("work");
+  const [seconds, setSeconds] = useState(PRESETS[2].work);
   const [isRunning, setRunning] = useState(false);
   const [savedMessage, setSavedMessage] = useState("");
   const startedAtRef = useRef(null);
+  // Ref mirrors phase so the seconds=0 effect always reads the current value
+  const phaseRef = useRef("work");
+  const presetIdxRef = useRef(2);
 
-  async function saveSession() {
+  const preset = PRESETS[presetIdx];
+  const totalSeconds = phase === "work" ? preset.work : preset.brk;
+
+  async function saveSession(workSeconds) {
     if (!userId || !startedAtRef.current) return;
     const endedAt = new Date().toISOString();
     try {
@@ -43,7 +49,7 @@ function PomodoroTimer({ userId }) {
           session_type: "work",
           started_at: startedAtRef.current,
           ended_at: endedAt,
-          duration_seconds: SESSION_SECONDS,
+          duration_seconds: workSeconds,
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -63,19 +69,49 @@ function PomodoroTimer({ userId }) {
     return () => clearInterval(interval);
   }, [isRunning]);
 
-  // Stop and save automatically when the session ends
+  // Handle phase transitions when the countdown hits zero
   useEffect(() => {
     if (seconds !== 0) return;
-    setRunning(false);
-    saveSession();
+    const currentPreset = PRESETS[presetIdxRef.current];
+    if (phaseRef.current === "work") {
+      saveSession(currentPreset.work);
+      if (currentPreset.brk > 0) {
+        phaseRef.current = "break";
+        setPhase("break");
+        setSeconds(currentPreset.brk);
+        // stay running — break starts automatically
+      } else {
+        setRunning(false);
+      }
+    } else {
+      // break finished
+      setRunning(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seconds]);
 
   const state =
     seconds === 0 ? "done"
     : isRunning ? "running"
-    : seconds < SESSION_SECONDS ? "paused"
+    : seconds < totalSeconds ? "paused"
     : "ready";
+
+  const stateLabel = {
+    ready:   phase === "break" ? "Break ready"   : "Standby",
+    running: phase === "break" ? "On break"      : "Focusing",
+    paused:  phase === "break" ? "Break paused"  : "Paused",
+    done:    "Session complete",
+  }[state];
+
+  const pill = {
+    ready:   "Idle",
+    running: phase === "break" ? "Break" : "Active",
+    paused:  "Hold",
+    done:    "Done",
+  }[state];
+
+  const kana = phase === "break" ? "休憩" : "集中";
+  const kanaFull = phase === "break" ? "休憩モード" : "集中モード";
 
   // Show the countdown in the browser tab during a session
   useEffect(() => {
@@ -86,33 +122,47 @@ function PomodoroTimer({ userId }) {
     return () => { document.title = original; };
   }, [seconds, state]);
 
-  function reset() {
+  function selectPreset(idx) {
+    phaseRef.current = "work";
+    presetIdxRef.current = idx;
+    setPresetIdx(idx);
+    setPhase("work");
+    setSeconds(PRESETS[idx].work);
     setRunning(false);
-    setSeconds(SESSION_SECONDS);
+    startedAtRef.current = null;
+    setSavedMessage("");
+  }
+
+  function reset() {
+    phaseRef.current = "work";
+    setPhase("work");
+    setRunning(false);
+    setSeconds(preset.work);
     startedAtRef.current = null;
     setSavedMessage("");
   }
 
   function handleAction() {
     if (state === "done") {
-      setSeconds(SESSION_SECONDS);
+      phaseRef.current = "work";
+      setPhase("work");
+      setSeconds(preset.work);
       setSavedMessage("");
       startedAtRef.current = new Date().toISOString();
       setRunning(true);
       return;
     }
-    if (!isRunning && startedAtRef.current === null) {
+    if (!isRunning && startedAtRef.current === null && phaseRef.current === "work") {
       startedAtRef.current = new Date().toISOString();
     }
     setRunning((prev) => !prev);
   }
 
-  const fraction = seconds / SESSION_SECONDS;
-  const elapsed = SESSION_SECONDS - seconds;
-  const progress = Math.round((elapsed / SESSION_SECONDS) * 100);
-  // Elapsed minutes go dark starting at 12 o'clock, moving clockwise
+  const fraction = seconds / totalSeconds;
+  const elapsed = totalSeconds - seconds;
+  const progress = Math.round((elapsed / totalSeconds) * 100);
   const darkTicks = TICKS - Math.ceil(fraction * TICKS);
-  const filledSegments = Math.round((elapsed / SESSION_SECONDS) * SEGMENTS);
+  const filledSegments = Math.round((elapsed / totalSeconds) * SEGMENTS);
 
   const actionLabel = {
     ready: "Start",
@@ -121,13 +171,33 @@ function PomodoroTimer({ userId }) {
     done: "Start again",
   }[state];
 
+  const canChangePreset = state === "ready" || state === "done";
+
   return (
-    <section className={`timer timer--${state}`} aria-label="Focus timer">
+    <section className={`timer timer--${state} timer--${phase}`} aria-label="Focus timer">
       {/* ===== Left HUD: session data ===== */}
       <aside className="hud-panel hud-panel--left chamfer">
         <div className="hud-panel__head">
           <span className="hud-label">Session</span>
           <span className="hud-panel__code">FCS-01</span>
+        </div>
+
+        <div className="preset-group">
+          <span className="hud-label">Preset</span>
+          <div className="preset-btns">
+            {PRESETS.map((p, i) => (
+              <button
+                key={p.label}
+                type="button"
+                className={`preset-btn${presetIdx === i ? " preset-btn--active" : ""}`}
+                onClick={() => selectPreset(i)}
+                disabled={!canChangePreset}
+                aria-pressed={presetIdx === i}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="meter">
@@ -144,8 +214,8 @@ function PomodoroTimer({ userId }) {
 
         <dl className="readouts">
           <div>
-            <dt className="hud-label">Length</dt>
-            <dd>{formatTimeHours(SESSION_SECONDS)}</dd>
+            <dt className="hud-label">Phase</dt>
+            <dd>{phase === "work" ? "Work" : "Break"}</dd>
           </div>
           <div>
             <dt className="hud-label">Elapsed</dt>
@@ -158,7 +228,7 @@ function PomodoroTimer({ userId }) {
       <div className="timer__center">
         <div className="timer__dial">
           <svg viewBox={`0 0 ${SIZE} ${SIZE}`} aria-hidden="true">
-            {/* Minute ticks: one per remaining minute stays lit */}
+            {/* Minute ticks */}
             {Array.from({ length: TICKS }, (_, i) => {
               const major = i % 5 === 0;
               const [x1, y1] = polar(major ? 136 : 143, i * 6);
@@ -210,11 +280,11 @@ function PomodoroTimer({ userId }) {
           </svg>
 
           <div className="timer__readout">
-            <span className="kana" aria-hidden="true">集中</span>
+            <span className="kana" aria-hidden="true">{kana}</span>
             <span id="timer" className="timer__digits" role="timer" aria-live="off">
               {formatTimeHours(seconds)}
             </span>
-            <span className="timer__state hud-label">{STATE[state].label}</span>
+            <span className="timer__state hud-label">{stateLabel}</span>
           </div>
         </div>
 
@@ -236,12 +306,12 @@ function PomodoroTimer({ userId }) {
           <span className="hud-label">Status</span>
           <span className={`pill pill--${state}`}>
             <span className="pill__dot" />
-            {STATE[state].pill}
+            {pill}
           </span>
         </div>
 
         <p className="hud-panel__vertical kana" aria-hidden="true">
-          {[..."集中モード"].map((ch, i) => <span key={i}>{ch}</span>)}
+          {[...kanaFull].map((ch, i) => <span key={i}>{ch}</span>)}
         </p>
 
         <div className="hud-panel__foot">
