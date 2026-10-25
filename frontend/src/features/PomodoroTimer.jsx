@@ -8,7 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 const PRESETS = [
   { label: "25 / 5",  work: 25 * 60, brk:  5 * 60 },
   { label: "50 / 10", work: 50 * 60, brk: 10 * 60 },
-  { label: "60",      work: 60 * 60, brk:  0       },
+  { label: "Custom",  work: null,    brk:  null     },
 ];
 
 const TICKS = 60;
@@ -23,19 +23,36 @@ const polar = (r, deg) => {
   return [C + Math.cos(a) * r, C + Math.sin(a) * r];
 };
 
+const clampCustom = (val, min, max) => Math.min(max, Math.max(min, Math.round(Number(val)) || min));
+
 function PomodoroTimer({ userId }) {
-  const [presetIdx, setPresetIdx] = useState(2);
+  const [presetIdx, setPresetIdx] = useState(0);
   const [phase, setPhase] = useState("work");
-  const [seconds, setSeconds] = useState(PRESETS[2].work);
+  const [customWork, setCustomWork] = useState(25);       // input display value
+  const [customBreak, setCustomBreak] = useState(5);
+  const [committedWork, setCommittedWork] = useState(25); // value the timer actually uses
+  const [committedBreak, setCommittedBreak] = useState(5);
+  const [seconds, setSeconds] = useState(PRESETS[0].work);
   const [isRunning, setRunning] = useState(false);
   const [savedMessage, setSavedMessage] = useState("");
   const startedAtRef = useRef(null);
   // Ref mirrors phase so the seconds=0 effect always reads the current value
   const phaseRef = useRef("work");
-  const presetIdxRef = useRef(2);
+  const presetIdxRef = useRef(0);
 
   const preset = PRESETS[presetIdx];
-  const totalSeconds = phase === "work" ? preset.work : preset.brk;
+  const effectivePreset = {
+    work: preset.work ?? committedWork * 60,
+    brk:  preset.brk  ?? committedBreak * 60,
+  };
+  const effectiveWorkRef = useRef(effectivePreset.work);
+  const effectiveBrkRef  = useRef(effectivePreset.brk);
+  useEffect(() => {
+    effectiveWorkRef.current = effectivePreset.work;
+    effectiveBrkRef.current  = effectivePreset.brk;
+  });
+
+  const totalSeconds = phase === "work" ? effectivePreset.work : effectivePreset.brk;
 
   async function saveSession(workSeconds) {
     if (!userId || !startedAtRef.current) return;
@@ -72,13 +89,12 @@ function PomodoroTimer({ userId }) {
   // Handle phase transitions when the countdown hits zero
   useEffect(() => {
     if (seconds !== 0) return;
-    const currentPreset = PRESETS[presetIdxRef.current];
     if (phaseRef.current === "work") {
-      saveSession(currentPreset.work);
-      if (currentPreset.brk > 0) {
+      saveSession(effectiveWorkRef.current);
+      if (effectiveBrkRef.current > 0) {
         phaseRef.current = "break";
         setPhase("break");
-        setSeconds(currentPreset.brk);
+        setSeconds(effectiveBrkRef.current);
         // stay running — break starts automatically
       } else {
         setRunning(false);
@@ -127,7 +143,8 @@ function PomodoroTimer({ userId }) {
     presetIdxRef.current = idx;
     setPresetIdx(idx);
     setPhase("work");
-    setSeconds(PRESETS[idx].work);
+    const p = PRESETS[idx];
+    setSeconds(p.work ?? committedWork * 60);
     setRunning(false);
     startedAtRef.current = null;
     setSavedMessage("");
@@ -137,7 +154,7 @@ function PomodoroTimer({ userId }) {
     phaseRef.current = "work";
     setPhase("work");
     setRunning(false);
-    setSeconds(preset.work);
+    setSeconds(effectivePreset.work);
     startedAtRef.current = null;
     setSavedMessage("");
   }
@@ -146,7 +163,7 @@ function PomodoroTimer({ userId }) {
     if (state === "done") {
       phaseRef.current = "work";
       setPhase("work");
-      setSeconds(preset.work);
+      setSeconds(effectivePreset.work);
       setSavedMessage("");
       startedAtRef.current = new Date().toISOString();
       setRunning(true);
@@ -198,6 +215,52 @@ function PomodoroTimer({ userId }) {
               </button>
             ))}
           </div>
+          {presetIdx === 2 && (
+            <div className="custom-inputs">
+              <label className="custom-field">
+                <span className="hud-label">Work</span>
+                <input
+                  className="custom-input"
+                  type="number"
+                  min={1}
+                  max={120}
+                  value={customWork}
+                  disabled={!canChangePreset}
+                  onChange={(e) => setCustomWork(Number(e.target.value))}
+                  onBlur={(e) => {
+                    const v = clampCustom(e.target.value, 1, 120);
+                    setCustomWork(v);
+                    setCommittedWork(v);
+                    if (!isRunning && startedAtRef.current === null && phase === "work") {
+                      setSeconds(v * 60);
+                    }
+                  }}
+                />
+                <span className="hud-label">min</span>
+              </label>
+              <label className="custom-field">
+                <span className="hud-label">Break</span>
+                <input
+                  className="custom-input"
+                  type="number"
+                  min={0}
+                  max={60}
+                  value={customBreak}
+                  disabled={!canChangePreset}
+                  onChange={(e) => setCustomBreak(Number(e.target.value))}
+                  onBlur={(e) => {
+                    const v = clampCustom(e.target.value, 0, 60);
+                    setCustomBreak(v);
+                    setCommittedBreak(v);
+                    if (!isRunning && startedAtRef.current === null && phase === "break") {
+                      setSeconds(v * 60);
+                    }
+                  }}
+                />
+                <span className="hud-label">min</span>
+              </label>
+            </div>
+          )}
         </div>
 
         <div className="meter">
